@@ -1,0 +1,7 @@
+{
+    "DATABASE_HOST":"elasticsearch",
+    "DATABASE_PORT": 9200,
+    "FILE_SAVE_LOCATION": "./FILE_STORAGE/",
+    "FOLDER_DEPTH": 5,
+    "SECRET_KEY": "dev"
+}

@@ -1,13 +1,15 @@
-from api.image_manager_interface import ImageManagerInterface
+from image_manager_interface import ImageManagerInterface
 from werkzeug.datastructures import FileStorage
 import os
 
 class ImageManagerLocal(ImageManagerInterface):
-    LOCATION="./files/"
-    FOLDER_DEPTH = 8
+
+    def __init__(self, file_location, folder_depth):
+        self.file_save_location = file_location
+        self.folder_depth = folder_depth
 
     def generate_file_save_dir(self, filename) -> str:
-        return os.path.join(self.LOCATION, *list(filename[:self.FOLDER_DEPTH]))
+        return os.path.join(self.file_save_location, *list(filename[:self.folder_depth]))
 
     def save_to_storage(self, image_name: str, file: FileStorage):
         dir = self.generate_file_save_dir(image_name) 
@@ -22,6 +24,5 @@ class ImageManagerLocal(ImageManagerInterface):
             os.remove(file_path)
 
     def get_image(self, image_name):
-        # TODO: Remove relative path reference
-        return "../"+os.path.join(self.generate_file_save_dir(image_name), image_name)
+        return os.path.join(self.generate_file_save_dir(image_name), image_name)
 
