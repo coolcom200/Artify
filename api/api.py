@@ -9,8 +9,8 @@ app = Flask(__name__)
 app.config.from_json("config.json")
 api = Api(app)
 
-database = ElasticsearchDatabase(app.config['DATABASE_HOST'], app.config['DATABASE_PORT'])
-image_manager = ImageManagerLocal(app.config['FILE_SAVE_LOCATION'], app.config['FOLDER_DEPTH'])
+database = ElasticsearchDatabase(app.config["DATABASE_HOST"], app.config["DATABASE_PORT"])
+image_manager = ImageManagerLocal(app.config["FILE_SAVE_LOCATION"], app.config["FOLDER_DEPTH"])
 
 
 @app.before_request
@@ -23,9 +23,9 @@ def load_logged_in_user():
 
 
 
-api.add_resource(resources.Register, '/register')
-api.add_resource(resources.Login, '/login')
-api.add_resource(resources.Logout, '/logout')
-api.add_resource(resources.CreateProduct, '/create')
-api.add_resource(resources.Search, '/search')
-api.add_resource(resources.GetImage, '/image/<image_id>/')
+api.add_resource(resources.Register, "/register")
+api.add_resource(resources.Login, "/login")
+api.add_resource(resources.Logout, "/logout")
+api.add_resource(resources.CreateProduct, "/create")
+api.add_resource(resources.Search, "/search")
+api.add_resource(resources.GetImage, "/image/<image_id>/")

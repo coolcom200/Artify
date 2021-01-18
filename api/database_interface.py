@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from models import User, Product
 from typing import Optional, List
 
-
 class DatabaseInterface(ABC):
 
     @abstractmethod

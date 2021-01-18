@@ -29,7 +29,7 @@ def get_or_none(key: any, from_dict: dict):
 def log_user_in(user_id):
     session.clear()
     session["user_id"] = user_id
-    return '', 200
+    return "", 200
 
 class Register(Resource):
     def post(self):
@@ -79,7 +79,7 @@ class Logout(Resource):
     @login_required
     def get(self):
         session.clear()
-        return '', 200
+        return "", 200
 
 # ---------------------- #
 #        Product         #
@@ -90,10 +90,10 @@ class CreateProduct(Resource):
     def post(self):
         files = request.files.getlist("files")
         form_data = request.form
-        title = get_or_none('title', form_data)
-        desc = get_or_none('description', form_data)
-        price = get_or_none('price', form_data)
-        vis = get_or_none('visibility', form_data)
+        title = get_or_none("title", form_data)
+        desc = get_or_none("description", form_data)
+        price = get_or_none("price", form_data)
+        vis = get_or_none("visibility", form_data)
         error = None
 
         if title is None or title == "":
@@ -119,13 +119,13 @@ class CreateProduct(Resource):
             else:
                 abort(400, error_message="All files must be images")
 
-        result = api.database.create_product_details(session['user_id'], title, desc, is_visible, price, list_image_details)
-        return '', 200
+        result = api.database.create_product_details(session["user_id"], title, desc, is_visible, price, list_image_details)
+        return "", 200
 
 class Search(Resource):
     def get(self):
-        price_min = request.args.get('price_min')
-        price_max = request.args.get('price_max')
+        price_min = request.args.get("price_min")
+        price_max = request.args.get("price_max")
         if price_min is not None:
             price_min = float(price_min)
         else:
@@ -134,7 +134,7 @@ class Search(Resource):
         if price_max is not None:
             price_max = float(price_max)
 
-        query = request.args.get('query')
+        query = request.args.get("query")
         result = api.database.get_products(query, price_min, price_max)
         return jsonify([product.__dict__ for product in result])
 

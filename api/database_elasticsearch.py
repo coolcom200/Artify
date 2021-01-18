@@ -12,7 +12,7 @@ class ElasticsearchDatabase(DatabaseInterface):
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.es = Elasticsearch([{'host': self.host, 'port': self.port}])
+        self.es = Elasticsearch([{"host": self.host, "port": self.port}])
 
     def create_product_details(self, owner_id: str, title: str, desc: str, is_visible: bool, price: float,
                                list_image_details) -> str:
@@ -46,8 +46,8 @@ class ElasticsearchDatabase(DatabaseInterface):
         }
 
         result = self.es.search(index=self.USERS_INDEX, body=search_body)
-        if result is not None and len(result['hits']['hits']) == 1:
-            return User(result['hits']['hits'][0])
+        if result is not None and len(result["hits"]["hits"]) == 1:
+            return User(result["hits"]["hits"][0])
         else:
             return None
 
@@ -60,8 +60,8 @@ class ElasticsearchDatabase(DatabaseInterface):
             }
         }
         result = self.es.search(index=self.USERS_INDEX, body=search_body)
-        if result is not None and len(result['hits']['hits']) == 1:
-            return User(result['hits']['hits'][0])
+        if result is not None and len(result["hits"]["hits"]) == 1:
+            return User(result["hits"]["hits"][0])
 
         else:
             return None
@@ -94,8 +94,8 @@ class ElasticsearchDatabase(DatabaseInterface):
         return self.convert_es_to_product(result)
 
     def convert_es_to_product(self, result) -> List[Product]:
-        if result is not None and len(result['hits']['hits']) > 0:
-            return [Product(hit) for hit in result['hits']['hits']]
+        if result is not None and len(result["hits"]["hits"]) > 0:
+            return [Product(hit) for hit in result["hits"]["hits"]]
         else:
             return []
 
