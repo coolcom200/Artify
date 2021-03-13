@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from models import User, Product
 from typing import Optional, List
+
+from models import User, Product
+
 
 class DatabaseInterface(ABC):
 
@@ -17,10 +19,12 @@ class DatabaseInterface(ABC):
         pass
 
     @abstractmethod
-    def create_product_details(self, owner_id: str, title: str, desc: str, is_visible: bool, price: float,
-                               list_image_details) -> str:
+    def create_product_details(self, owner_id: str, title: str, desc: str,
+                               is_visible: bool, price: float,
+                               list_image_details) -> Optional[Product]:
         pass
 
     @abstractmethod
-    def get_products(self, query: str, price_min: float, price_max: Optional[float]=None) -> List[Product]:
+    def get_products(self, query: str, price_min: float,
+                     price_max: Optional[float] = None) -> List[Product]:
         pass

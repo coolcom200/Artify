@@ -1,0 +1,59 @@
+scalar Upload
+
+type File {
+    file_path: String!
+    file_name: String!
+}
+
+type Product {
+    owner_id: ID!
+    product_name: String!
+    description: String!
+    is_visible: Boolean!
+    price: Float!
+    uid: ID!
+    images: [File!]!
+}
+
+type AuthResponse {
+    error: String
+}
+
+type User {
+    name: String!
+    email: String!
+    uid: ID!
+}
+
+type Query {
+  search(searchQuery:String, minPrice: Float, maxPrice:Float): [Product!]!
+  me: User
+}
+
+
+input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input CreateProductInput {
+    product_name: String!
+    description: String!
+    price: Float!
+    is_visible: Boolean!
+    files: [Upload!]!
+}
+
+type Mutation {
+  logout: AuthResponse!
+  login(input: LoginInput!): AuthResponse!
+  register(input: RegisterInput!): AuthResponse!
+  createProduct(input: CreateProductInput!): Product!
+}
+

@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from uuid import uuid4 as generate_uuid
+
 from werkzeug.datastructures import FileStorage
+
 
 class ImageManagerInterface(ABC):
 
     def is_allowed_file_type(self, file: FileStorage):
-       pass 
+        pass
 
     def save_image(self, file: FileStorage) -> str:
         safe_filename = str(generate_uuid())
@@ -23,5 +25,3 @@ class ImageManagerInterface(ABC):
     @abstractmethod
     def get_image(self, image_name) -> str:
         pass
-
-    

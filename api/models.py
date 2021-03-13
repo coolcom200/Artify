@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
+
 @dataclass
 class User:
     name: str
@@ -37,12 +38,13 @@ class Product:
     uid: str
     images: List[FileWithPath]
 
-    def __init__(self, elasticsearch_result):
-        product_data = elasticsearch_result["_source"]
-        self.uid = elasticsearch_result["_id"]
-        self.owner_id = product_data["owner_id"]
-        self.product_name = product_data["product_name"]
-        self.description = product_data["description"]
-        self.is_visible = product_data["is_visible"]
-        self.price = product_data["price"]
-        self.images = product_data["images"]
+    def __init__(self, owner_id: str, product_name: str, description: str,
+                 is_visible: bool, price: float, uid: str,
+                 images: List[FileWithPath]):
+        self.uid = uid
+        self.owner_id = owner_id
+        self.product_name = product_name
+        self.description = description
+        self.is_visible = is_visible
+        self.price = price
+        self.images = images
