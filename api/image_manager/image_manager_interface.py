@@ -6,9 +6,6 @@ from werkzeug.datastructures import FileStorage
 
 class ImageManagerInterface(ABC):
 
-    def is_allowed_file_type(self, file: FileStorage):
-        pass
-
     def save_image(self, file: FileStorage) -> str:
         safe_filename = str(generate_uuid())
         self.save_to_storage(safe_filename, file)

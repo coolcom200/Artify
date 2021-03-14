@@ -3,7 +3,7 @@ from time import sleep
 
 from requests import get, ConnectionError
 
-from database_elasticsearch import ElasticsearchDatabase
+from api.database.database_elasticsearch import ElasticsearchDatabase
 
 
 def check_connection(host, port):
@@ -17,7 +17,7 @@ def check_connection(host, port):
     return json_status["status"] != "red"
 
 
-with open("config.json") as config_file:
+with open("../config.json") as config_file:
     sleep_time = 5
     config = json.load(config_file)
     host = "localhost"

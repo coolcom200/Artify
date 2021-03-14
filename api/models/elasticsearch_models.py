@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
+from api.models.common_models import FileWithPath
+
 
 @dataclass
-class User:
+class UserElasticsearch:
     name: str
     email: str
     uid: str
@@ -18,18 +20,7 @@ class User:
 
 
 @dataclass
-class FileWithPath:
-    data: dict
-
-    def __init__(self, file_name, file_path):
-        self.data = {"file_name": file_name, "file_path": file_path}
-
-    def to_dict(self):
-        return self.data
-
-
-@dataclass
-class Product:
+class ProductElasticsearch:
     owner_id: str
     product_name: str
     description: str
@@ -38,9 +29,8 @@ class Product:
     uid: str
     images: List[FileWithPath]
 
-    def __init__(self, owner_id: str, product_name: str, description: str,
-                 is_visible: bool, price: float, uid: str,
-                 images: List[FileWithPath]):
+    def __init__(self, owner_id: str, product_name: str, description: str, is_visible: bool,
+                 price: float, uid: str, images: List[FileWithPath]):
         self.uid = uid
         self.owner_id = owner_id
         self.product_name = product_name

@@ -2,7 +2,7 @@ import os
 
 from werkzeug.datastructures import FileStorage
 
-from image_manager_interface import ImageManagerInterface
+from .image_manager_interface import ImageManagerInterface
 
 
 class ImageManagerLocal(ImageManagerInterface):
@@ -12,8 +12,7 @@ class ImageManagerLocal(ImageManagerInterface):
         self.folder_depth = folder_depth
 
     def generate_file_save_dir(self, filename) -> str:
-        return os.path.join(self.file_save_location,
-                            *list(filename[:self.folder_depth]))
+        return os.path.join(self.file_save_location, *list(filename[:self.folder_depth]))
 
     def save_to_storage(self, image_name: str, file: FileStorage):
         directory = self.generate_file_save_dir(image_name)

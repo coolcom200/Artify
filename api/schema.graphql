@@ -1,33 +1,34 @@
 scalar Upload
 
 type File {
-    file_path: String!
-    file_name: String!
+    filePath: String!
+    fileName: String!
 }
 
 type Product {
-    owner_id: ID!
-    product_name: String!
+    owner: User!
+    productName: String!
     description: String!
-    is_visible: Boolean!
+    isVisible: Boolean!
     price: Float!
     uid: ID!
     images: [File!]!
 }
 
 type AuthResponse {
-    error: String
+    message: String
 }
 
 type User {
     name: String!
     email: String!
     uid: ID!
+    products: [Product!]!
 }
 
 type Query {
   search(searchQuery:String, minPrice: Float, maxPrice:Float): [Product!]!
-  me: User
+  me: User!
 }
 
 
@@ -43,10 +44,10 @@ input LoginInput {
 }
 
 input CreateProductInput {
-    product_name: String!
+    productName: String!
     description: String!
     price: Float!
-    is_visible: Boolean!
+    isVisible: Boolean!
     files: [Upload!]!
 }
 
