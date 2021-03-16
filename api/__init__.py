@@ -1,16 +1,22 @@
 import json
+from os import path
 
 from ariadne import graphql_sync, make_executable_schema, load_schema_from_path, gql, upload_scalar
 from ariadne.constants import PLAYGROUND_HTML, DATA_TYPE_MULTIPART
 from ariadne.exceptions import HttpBadRequestError
 from ariadne.file_uploads import combine_multipart_data
-from flask import Flask, g, session, request, jsonify, send_file
+from flask import Flask, g, session, request, jsonify, send_file, abort
 
 from api.database import get_database
 from api.image_manager import get_image_manager
 from api.resolvers.mutation_resolvers import mutation
 from api.resolvers.product_resolvers import product
 from api.resolvers.query_resolvers import query
+from api.resolvers.user_resolvers import user
+
+HTTP_NOT_FOUND = 404
+HTTP_SUCCESS = 200
+HTTP_BAD_REQUEST = 400
 
 app = Flask(__name__)
 app.config.from_json("./config.json")
@@ -20,12 +26,12 @@ image_manager = get_image_manager(app)
 
 type_defs = load_schema_from_path("./schema.graphql")
 gql(type_defs)  # gql verification
-schema = make_executable_schema(type_defs, query, mutation, upload_scalar, product)
+schema = make_executable_schema(type_defs, query, mutation, upload_scalar, product, user)
 
 
 def handle_upload(form):
     """Based on Specification:
-    https://github.com/jaydenseric/graphql-multipart-request-spec """
+    https://github.com/jaydenseric/graphql-multipart-request-spec"""
     try:
         operations = json.loads(form["operations"])
     except (KeyError, ValueError):
@@ -40,12 +46,16 @@ def handle_upload(form):
 
 @app.route("/graphql", methods=["GET"])
 def graphql_playground():
-    return PLAYGROUND_HTML, 200
+    return PLAYGROUND_HTML, HTTP_SUCCESS
 
 
-@app.route('/image/<image_id>/', methods=["GET"])
+@app.route("/image/<image_id>/", methods=["GET"])
 def get_image(image_id):
-    return send_file(image_manager.get_image(image_id))
+    image_path = image_manager.get_image(image_id)
+    if not path.exists(image_path):
+        abort(HTTP_NOT_FOUND)
+    else:
+        return send_file(image_path)
 
 
 @app.route("/graphql", methods=["POST"])
@@ -58,7 +68,7 @@ def graphql_server():
     success, result = graphql_sync(schema, data, debug=app.debug,
                                    context_value={"request": request, "database": database,
                                                   "image_manager": image_manager})
-    status_code = 200 if success else 400
+    status_code = HTTP_SUCCESS if success else HTTP_BAD_REQUEST
     return jsonify(result), status_code
 
 

@@ -1,9 +1,10 @@
-import json
 from time import sleep
 
 from requests import get, ConnectionError
 
 from api.database.database_elasticsearch import ElasticsearchDatabase
+
+TIME_SLEEP = 2
 
 
 def check_connection(host, port):
@@ -17,15 +18,7 @@ def check_connection(host, port):
     return json_status["status"] != "red"
 
 
-with open("../config.json") as config_file:
-    sleep_time = 5
-    config = json.load(config_file)
-    host = "localhost"
-    port = config["DATABASE_PORT"]
-    while not check_connection(host, port):
-        sleep(sleep_time)
-        print("Waiting for database to start")
-
-    es = ElasticsearchDatabase(host, port)
-    es.init_db()
-    print("Indices created")
+def init_elasticsearch_indices(db: ElasticsearchDatabase):
+    while not check_connection(db.host, db.port):
+        sleep(TIME_SLEEP)
+    db.init_db()

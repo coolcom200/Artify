@@ -4,6 +4,7 @@ from uuid import uuid4 as generate_uuid
 from elasticsearch import Elasticsearch
 
 from api.database.database_interface import DatabaseInterface
+from api.models.common_models import FileWithPath
 from api.models.elasticsearch_models import ProductElasticsearch, UserElasticsearch
 
 
@@ -23,14 +24,14 @@ class ElasticsearchDatabase(DatabaseInterface):
 
         item = {"owner_id": owner_id, "product_name": title, "description": desc,
                 "is_visible": is_visible, "price": price,
-                "images": [{"file_path": details.file_path, "file_name": details.file_name} for
+                "images": [{"file_path": details.filePath, "file_name": details.fileName} for
                            details in list_image_details]}
 
         result = self.es.create(self.IMAGES_INDEX, str(generate_uuid()), item)
 
-        if result is not None and result['result'] == 'created':
+        if result is not None and result["result"] == "created":
             return ProductElasticsearch(owner_id, title, desc, is_visible, price, result["_id"],
-                                        list_image_details)
+                                        list_image_details, self.get_user_by_id)
 
     def create_user(self, email, name, password_hash) -> str:
         result = self.es.create(self.USERS_INDEX, str(generate_uuid()),
@@ -42,7 +43,7 @@ class ElasticsearchDatabase(DatabaseInterface):
 
         result = self.es.search(index=self.USERS_INDEX, body=search_body)
         if result is not None and len(result["hits"]["hits"]) == 1:
-            return UserElasticsearch(result["hits"]["hits"][0])
+            return UserElasticsearch(result["hits"]["hits"][0], self.get_users_products)
         else:
             return None
 
@@ -50,10 +51,19 @@ class ElasticsearchDatabase(DatabaseInterface):
         search_body = {"query": {"term": {"email": email}}}
         result = self.es.search(index=self.USERS_INDEX, body=search_body)
         if result is not None and len(result["hits"]["hits"]) == 1:
-            return UserElasticsearch(result["hits"]["hits"][0])
+            return UserElasticsearch(result["hits"]["hits"][0], self.get_users_products)
 
         else:
             return None
+
+    def get_users_products(self, user_id) -> List[ProductElasticsearch]:
+        search_body = {"query": {"term": {"owner_id": user_id}}}
+
+        result = self.es.search(index=self.IMAGES_INDEX, body=search_body)
+        if result is not None and len(result["hits"]["hits"]) >= 1:
+            return self.convert_es_to_product(result)
+        else:
+            return []
 
     def get_products(self, query: Optional[str], price_min: Optional[float],
                      price_max: Optional[float] = None) -> List[ProductElasticsearch]:
@@ -79,13 +89,14 @@ class ElasticsearchDatabase(DatabaseInterface):
         result = self.es.search(index=self.IMAGES_INDEX, body=search_body)
         return self.convert_es_to_product(result)
 
-    @staticmethod
-    def _convert_one_to_product(elasticsearch_result):
+    def _convert_one_to_product(self, elasticsearch_result):
         product_data = elasticsearch_result["_source"]
+        images = [FileWithPath(product_image["file_name"], product_image["file_path"]) for
+                  product_image in product_data["images"]]
         return ProductElasticsearch(product_data["owner_id"], product_data["product_name"],
                                     product_data["description"], product_data["is_visible"],
-                                    product_data["price"], elasticsearch_result["_id"],
-                                    product_data["images"])
+                                    product_data["price"], elasticsearch_result["_id"], images,
+                                    self.get_user_by_id)
 
     def convert_es_to_product(self, result) -> List[ProductElasticsearch]:
         if result is not None and len(result["hits"]["hits"]) > 0:
@@ -95,16 +106,17 @@ class ElasticsearchDatabase(DatabaseInterface):
 
     def init_db(self, number_of_replicas=0):
         database: Elasticsearch = self.es
-        # Create an index to store the user information including including
-        # their name, email and hashed password
-        database.indices.create(self.USERS_INDEX, {"mappings": {
-            "properties": {"name": {"type": "text"}, "email": {"type": "keyword"},
-                           "password": {"type": "text", "index": False}, }},
-            "settings": {"number_of_replicas": number_of_replicas}})
-
-        # Create an index to store the image product data
-        database.indices.create(self.IMAGES_INDEX, {"mappings": {
-            "properties": {"product_name": {"type": "keyword"}, "description": {"type": "text"},
-                           "owner_id": {"type": "keyword", }, "is_visible": {"type": "boolean"},
-                           "price": {"type": "double"}, "images": {"type": "nested"}}},
-            "settings": {"number_of_replicas": number_of_replicas}})
+        if not database.indices.exists(self.USERS_INDEX):
+            # Create an index to store the user information including including
+            # their name, email and hashed password
+            database.indices.create(self.USERS_INDEX, {"mappings": {
+                "properties": {"name": {"type": "text"}, "email": {"type": "keyword"},
+                               "password": {"type": "text", "index": False}, }},
+                "settings": {"number_of_replicas": number_of_replicas}})
+        if not database.indices.exists(self.IMAGES_INDEX):
+            # Create an index to store the image product data
+            database.indices.create(self.IMAGES_INDEX, {"mappings": {
+                "properties": {"product_name": {"type": "keyword"}, "description": {"type": "text"},
+                               "owner_id": {"type": "keyword", }, "is_visible": {"type": "boolean"},
+                               "price": {"type": "double"}, "images": {"type": "nested"}}},
+                "settings": {"number_of_replicas": number_of_replicas}})

@@ -7,8 +7,8 @@ services:
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: artify_db
-    expose:
-      - 5432
+    ports:
+      - 5432:5432
 
   web:
     container_name: image-repository
@@ -23,17 +23,3 @@ services:
       - ./:/code
     depends_on:
       - postgres
-
-#  elasticsearch:
-#   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-#   container_name: elasticsearch
-#   environment:
-#     - discovery.type=single-node
-#   ports:
-#     - 9200:9200
-#   volumes:
-#     - elasticsearch-data:/usr/share/elasticsearch/data
-#
-#volumes:
-#  elasticsearch-data:
-#    driver: local
