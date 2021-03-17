@@ -20,7 +20,7 @@
   <li><a href="#getting-started">Getting Started</a></li>
   <li><a href="#api-details">API Details</a></li>
   <li><a href="#discussion">Discussion</a></li>
-  <li><a href="#improvements">improvements</a></li>
+  <li><a href="#things-to-improve">Improvements</a></li>
 </ol>
 
 ## About The Project
