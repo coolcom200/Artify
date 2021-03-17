@@ -184,7 +184,7 @@ cURL:
 curl --location --request POST 'http://localhost:5000/graphql' \
 --cookie-jar cookies.txt \
 --header 'Content-Type: application/json' \
---data-raw '{"query":"mutation {\n  login(input:{\n    email: \"test@test.ca\", password: \"123\"}) {\n    message\n  }\n}","variables":{}}'
+--data-raw '{"query":"mutation {\n  login(input:{\n    email: \"test@test.ca\", password: \"mypassword\"}) {\n    message\n  }\n}","variables":{}}'
 ```
 
 ### Logout Mutation
@@ -411,6 +411,8 @@ For PostgreSQL there are 3 tables that are shown in the diagram below.
 - Elasticsearch ORM
 
 - Improved Error Messages
+
+- Fix the isVisible option
 
 - Deploy it!
 
