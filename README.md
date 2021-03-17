@@ -163,7 +163,7 @@ cURL:
 curl --location --request POST 'http://localhost:5000/graphql' \
 --cookie-jar cookies.txt \
 --header 'Content-Type: application/json' \
---data-raw '{"query":"mutation {\n  register(\n    input: { name: \"My Name\", email: \"test2@test.ca\", password: \"mypassword\" }\n  ) {\n    message\n  }\n}","variables":{}}'
+--data-raw '{"query":"mutation {\n  register(\n    input: { name: \"My Name\", email: \"test@test.ca\", password: \"mypassword\" }\n  ) {\n    message\n  }\n}","variables":{}}'
 ```
 
 ### Login Mutation

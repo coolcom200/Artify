@@ -10,7 +10,7 @@ MAX_EMAIL_LENGTH = 255
 
 class UserPg(sql_alchemy_db.Model):
     __tablename__ = "user"
-    uid = sql_alchemy_db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4())
+    uid = sql_alchemy_db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = sql_alchemy_db.Column(sql_alchemy_db.String(MAX_NAME_LENGTH), nullable=False)
     email = sql_alchemy_db.Column(sql_alchemy_db.String(MAX_EMAIL_LENGTH), nullable=False,
                                   unique=True, index=True)
@@ -21,7 +21,7 @@ class UserPg(sql_alchemy_db.Model):
 
 class ProductPg(sql_alchemy_db.Model):
     __tablename__ = "product"
-    uid = sql_alchemy_db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4())
+    uid = sql_alchemy_db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     ownerUid = sql_alchemy_db.Column("owner_uid", UUID(as_uuid=True),
                                      sql_alchemy_db.ForeignKey("user.uid"), nullable=False)
     productName = sql_alchemy_db.Column("product_name", sql_alchemy_db.String(MAX_NAME_LENGTH),
@@ -37,7 +37,7 @@ class ProductPg(sql_alchemy_db.Model):
 class FilePg(sql_alchemy_db.Model):
     __tablename__ = "file"
     fileUid = sql_alchemy_db.Column("file_uid", UUID(as_uuid=True), nullable=False,
-                                    primary_key=True, default=uuid.uuid4())
+                                    primary_key=True, default=uuid.uuid4)
     productUid = sql_alchemy_db.Column("product_uid", UUID(as_uuid=True),
                                        sql_alchemy_db.ForeignKey("product.uid"), nullable=False)
     fileName = sql_alchemy_db.Column("file_name", sql_alchemy_db.String(MAX_NAME_LENGTH),
