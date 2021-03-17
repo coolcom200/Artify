@@ -59,11 +59,20 @@ To clone this project run:
 
 `git clone https://github.com/coolcom200/artify.git`
 
-To start the API, navigate into the repository you just cloned and run:
-`docker-compose up`
+Navigate into the repository you just cloned and switch to the `graphql-sql`
+branch: `git checkout graphql-sql`
+
+To start the API, run: `docker-compose up`
 
 Note: After starting the application wait around 30 seconds to ensure that every
-service has started correctly.
+service has started correctly. If the API starts before the database you might
+see a few errors relating to connecting to the database. These should disappear
+after a few requests are made.
+
+Afterwards you can navigate
+to [localhost:5000/graphql](http://localhost:5000/graphql)
+to use the GraphQL playground. You can also learn more about the
+API [here](#api-details)
 
 ## Configuration
 
@@ -112,14 +121,21 @@ a `docker-compose.yml` file with all the database technologies
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/c4861540b751a620558f)
 
-[View the API Postman hosted API documentation](https://documenter.getpostman.com/view/14969227/Tz5s4GHW)
+The API is running on [localhost:5000/graphql](http://localhost:5000/graphql)
+and has the GraphQL Playground enabled
 
-The API is running on [localhost:5000/graphql](localhost:5000/graphql) and has
-the GraphQL Playground enabled
+#### :warning: Authentication
 
-> :warning: Since the application uses session cookie based authentication you
-> should change the playground settings to include credentials in requests. To
-> do so change `"request.credentials": "omit"` to `"request.credentials": "include"`
+Since the application uses session cookie based authentication you should change
+the playground settings to include credentials in requests. To do so click the
+gear icon in the top right corner in the playground to open settings. Then find
+the line with `"request.credentials": "omit"` and change it
+to `"request.credentials": "include"`
+
+If you choose to use cURl requests make sure to add the correct options to save
+cookies such as `--cookie <cookie-jar file path>` to use a cookie jar for a
+request and `--cookie-jar <cookie-jar file path>` to save cookies from a request
+to the cookie jar file. Sample cURL requests have these options included.
 
 Initially the application has no data and needs to be populated with some data.
 To do so create an account and then create a product. Details for how to do so
@@ -128,7 +144,8 @@ are documented below.
 ### Register Mutation
 
 Creates an account. An account is required to create products, and see your
-products.
+products. Once you register your account you will get a session cookie and be
+logged in.
 
 ```
 mutation {
@@ -140,16 +157,34 @@ mutation {
 }
 ```
 
+cURL:
+
+```
+curl --location --request POST 'http://localhost:5000/graphql' \
+--cookie-jar cookies.txt \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"mutation {\n  register(\n    input: { name: \"My Name\", email: \"test2@test.ca\", password: \"mypassword\" }\n  ) {\n    message\n  }\n}","variables":{}}'
+```
+
 ### Login Mutation
 
 To log into your account
 
 ```
 mutation {
-  login(input: { email: "leon@test.ca", password: "123" }) {
+  login(input: { email: "test@test.ca", password: "mypassword" }) {
     message
   }
 }
+```
+
+cURL:
+
+```
+curl --location --request POST 'http://localhost:5000/graphql' \
+--cookie-jar cookies.txt \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"mutation {\n  login(input:{\n    email: \"test@test.ca\", password: \"123\"}) {\n    message\n  }\n}","variables":{}}'
 ```
 
 ### Logout Mutation
@@ -164,6 +199,15 @@ mutation {
 }
 ```
 
+cURL:
+
+```
+curl --location --request POST 'http://localhost:5000/graphql' \
+--cookie cookies.txt \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"mutation {\n  logout {\n      message\n  }\n}","variables":{}}'
+```
+
 ### Create Product Mutation
 
 The `createProduct` mutation is responsible for uploading images that are
@@ -172,14 +216,20 @@ Playground however it is possible using cURL
 and [Postman](https://app.getpostman.com/run-collection/c4861540b751a620558f).
 This is a protected endpoint so you will need to include cookies in the requests
 
-cURL: Replace anything in the `input: {...}` with your own values and provide a
-cookie and an image to upload
+cURL: Replace anything in the `input: {...}` with your own values, and an image
+to upload. You can also change the `{ uid }` to be any selection of fields part
+of the [Product](#graphql-schema) data type
+
+Note you will likely need to login using the cURL
+request [above](#login-mutation)
+in order to populate the cookie-jar (cookies.txt). You could also use Postman to
+login and then use the `createProduct` mutation.
 
 ```
 curl --location --request POST 'http://localhost:5000/graphql' \
---header 'Cookie: session=<COOKIE> \
+--cookie cookies.txt \
 --form 'map="{\"0\": [\"variables.input.files.0\"]}"' \
---form '0=@"/path/to/file"' \
+--form '0=@"<PATH TO FILE>"' \
 --form 'operations="{ \"query\":
 \"mutation ($input: CreateProductInput!) { createProduct(input: $input) { uid } }\",
 \"variables\": {
@@ -196,7 +246,7 @@ https://github.com/jaydenseric/graphql-multipart-request-spec
 
 ### Search Query
 
-To search for products. All parameters are optional. Avalible parameters
+To search for products. All parameters are optional. Available parameters
 are: `minPrice`, `maxPrice` and `searchQuery`
 
 ```
@@ -215,9 +265,17 @@ are: `minPrice`, `maxPrice` and `searchQuery`
 }
 ```
 
+cURL:
+
+``` 
+curl --location --request POST 'http://localhost:5000/graphql' \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"{\n  search {\n    productName\n    owner {\n      uid\n    }\n    price\n    images {\n      filePath\n      fileName\n    }\n  }\n}","variables":{}}'
+```
+
 ### Me Query
 
-To get information about the user
+To get information about the user. Must be authenticated.
 
 ```
 {
@@ -232,14 +290,25 @@ To get information about the user
 }
 ```
 
+cURL:
+
+```
+curl --location --request POST 'http://localhost:5000/graphql' \
+--cookie cookies.txt \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"{\n  me {\n    email\n    uid\n    name\n    products {\n      productName\n    }\n  }\n}","variables":{}}'
+```
+
 ### Download Image
 
-To download an image from the API replace the `<UUID>` with an image id.
+To download an image from the API replace the `<FilePath>` with the `filePath`.
+The
+`filePath` can be found using the [Search Query](#search-query)
 
-`curl 'http://localhost/api/image/<UUID>/' > out`
+`curl 'http://localhost:5000/image/<FilePath>/' > out`
 
 For example:
-`curl 'http://localhost/api/image/1b640668-ab4c-4db1-84f9-9698e2068dcc/' > out`
+`curl 'http://localhost:5000/image/1b640668-ab4c-4db1-84f9-9698e2068dcc/' > out`
 
 ## Discussion
 
@@ -258,6 +327,17 @@ has two indices one for the users and another for the products and files, then
 to get a product's owner would require querying the database for the owner. As a
 result, I created custom data models that would query the database for missing
 data.
+
+Images that are uploaded are stored on the API server for demonstration
+purposes. Once a file is uploaded, details about the file are added into the
+database to track the file's official name and the path to the file. Currently,
+the path to a file is just a randomly generated UUID which is sliced into a
+directory structure. For example a file with
+`filePath = 19ac0fea-fa27-4806-856f-57f0274d553e` could be sliced into the
+following directory
+structure: `1 > 9 > a > c > 0 > 19ac0fea-fa27-4806-856f-57f0274d553e`. The depth
+is configurable in the `config.json`. This structure prevents all the files from
+being stored in one massive folder and as a result can improve performance.
 
 ### Database Structure
 
@@ -375,4 +455,68 @@ services:
 volumes:
    elasticsearch-data:
       driver: local
+```
+
+## GraphQL Schema
+
+```graphql
+scalar Upload
+
+type File {
+    filePath: String!
+    fileName: String!
+}
+
+type Product {
+    owner: User!
+    productName: String!
+    description: String!
+    isVisible: Boolean!
+    price: Float!
+    uid: ID!
+    images: [File!]!
+}
+
+type AuthResponse {
+    message: String
+}
+
+type User {
+    name: String!
+    email: String!
+    uid: ID!
+    products: [Product!]!
+}
+
+type Query {
+  search(searchQuery:String, minPrice: Float, maxPrice:Float): [Product!]!
+  me: User!
+}
+
+
+input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input CreateProductInput {
+    productName: String!
+    description: String!
+    price: Float!
+    isVisible: Boolean!
+    files: [Upload!]!
+}
+
+type Mutation {
+  logout: AuthResponse!
+  login(input: LoginInput!): AuthResponse!
+  register(input: RegisterInput!): AuthResponse!
+  createProduct(input: CreateProductInput!): Product!
+}
 ```

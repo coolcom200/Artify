@@ -1,3 +1,5 @@
+from time import sleep
+
 from api.database.database_elasticsearch import ElasticsearchDatabase
 from api.database.database_interface import DatabaseInterface
 from api.database.database_postgres import PostgresDatabase
@@ -22,6 +24,8 @@ def get_database(app) -> DatabaseInterface:
 
             app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 
+        # TODO: Change to wait for the database to be running before initializing the application
+        sleep(10)
         sql_alchemy_db.init_app(app)
         sql_alchemy_db.create_all(app=app)
         return PostgresDatabase(sql_alchemy_db)

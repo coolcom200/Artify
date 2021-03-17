@@ -42,6 +42,7 @@ class FilePg(sql_alchemy_db.Model):
                                        sql_alchemy_db.ForeignKey("product.uid"), nullable=False)
     fileName = sql_alchemy_db.Column("file_name", sql_alchemy_db.String(MAX_NAME_LENGTH),
                                      nullable=False)
-    filePath = sql_alchemy_db.Column("file_path", sql_alchemy_db.Text, nullable=False)
+    filePath = sql_alchemy_db.Column("file_path", sql_alchemy_db.String(MAX_NAME_LENGTH),
+                                     nullable=False, primary_key=True)
 
     products = sql_alchemy_db.relationship("ProductPg", back_populates="images", lazy=True)
